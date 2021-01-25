@@ -45,10 +45,11 @@ setup(
     keywords='alphabacktest',
     name='alphabacktest',
     packages=find_packages(include=['alphabacktest', 'alphabacktest.*','_dash_results.*']),
+    package_data={'assets':['*'] },
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/serginc21/alphabacktest',
-    version='0.1.3',
+    version='0.1.5',
     zip_safe=False,
 )

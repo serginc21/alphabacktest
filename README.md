@@ -37,7 +37,10 @@ For backtesting, one of the critical parameters is the time it takes for the sys
 
 ## Installation ##
 
+You can fins all releases in [PyPI](https://pypi.org/project/alphabacktest/).
+
 ```$ pip install alphabacktest```
+
 
 ### Requirements ###
 
