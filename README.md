@@ -26,7 +26,6 @@ class mStrategy(Backtest):
 
 if __name__ == '__main__':
     mStrategy()      
-
 ```
 As seen, the usage is pretty straightforward, and does not require a huge effort for the user to import and/or work with it, being a smooth process and giving freedom to apply any strategy, from those based on technical indicators to AI, going through many different tools.
 
@@ -75,19 +74,17 @@ The ```super().__init__()``` is highly important here to define exactly how we w
             save_results=True,
             save_path=os.getcwd(),
             plot_results=True)
-
 ```
 ### Data source ###
 In the first place, the data can be pulled from Yahoo Finance via [pandas_datareader](https://pandas-datareader.readthedocs.io/en/latest/), or it can be imported from a local file.
 #### **From Yahoo Finance** ####
-In the first case, ```sym``` and ```file_path``` can be left as they are, while the ```ticker``` needs to be filled with the security symbol (according to the symbols Yahoo Finance uses). The ```dateformat``` of Yahoo Finance is the default format.
+In the first case, ```sym``` and ```file_path``` need to be left as they are, while the ```ticker``` needs to be filled with the security symbol (according to the symbols Yahoo Finance uses). The ```dateformat``` of Yahoo Finance is the default format.
 ```python
     super().__init__(self,ticker="AAPL")
-
 ```
 
 #### **From a local CSV file** ####
-If it is the second case, the initialization varies a little and ```sym```, ```file_path``` and ```dateformat``` parameters need to be specified, whilst ```ticker``` can be left as it is. It is important that the dateformat is specified correctly, otherwise an error will be raised by the datetime module.
+If it is the second case, the initialization varies a little and ```sym```, ```file_path``` and ```dateformat``` parameters need to be specified, and **do not** specify  ```ticker```. It is important that the dateformat is specified correctly, otherwise an error will be raised by the datetime module.
 ```python
     super().__init__(self, 
             sym="SP500",
@@ -130,7 +127,6 @@ If the user wants to backtest certain scenarios, the ```initial_time``` and ```f
             final_time="01/01/2020 23:55:00",
             dateformat="%Y-%m-%d %H:%M:%S",
             )
-
 ```
 
 ### Extras ###
@@ -198,7 +194,6 @@ Example:
             save_results=True,
             save_path="your/preferred/directory",
             plot_results=False)
-
 ```
 
 ### **Class attributes** ###
@@ -265,7 +260,9 @@ The methods of the inherited class are the following ones.
 
 Results
 --------
-The results are obtained via csv files and a dash app summary of the strategy performance that will be running on 
+The results are obtained via csv files and a dash app summary of the strategy performance that will be running on the local server ```http://127.0.0.1:port/``` as the logs report. 
+
+![](./img/dashappserver.png)
 
 
 Features
