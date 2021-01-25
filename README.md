@@ -1,5 +1,6 @@
 # alphabacktest -- under construction #
 -------
+[![PyPI version](https://badge.fury.io/py/alphabacktest.svg)](https://badge.fury.io/py/alphabacktest)
 
 > **DISCLAIMER: The results this backtesting software might produce may not be accurate, reliable or suppose any evidence ensuring a trading strategy profitability. The results are indicative and might not be appropiate for trading purposes. Therefore, the creator does not bear any responsibility for any losses anyone might incur as a result of using this software.**
 > 
