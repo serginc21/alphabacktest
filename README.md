@@ -37,10 +37,7 @@ For backtesting, one of the critical parameters is the time it takes for the sys
 
 ## Installation ##
 
-This is the installation
-```
-    pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple alphabacktest
-```
+```$ pip install alphabacktest```
 
 ### Requirements ###
 
