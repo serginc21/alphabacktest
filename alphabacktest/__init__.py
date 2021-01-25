@@ -3,7 +3,7 @@ import os
 
 __author__ = """Sergi Novellas"""
 __email__ = 'sernocr@gmail.com'
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 
 class Backtest(Engine):
