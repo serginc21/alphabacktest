@@ -256,7 +256,7 @@ class Broker(Trader):
 
 class Engine(Broker):
 
-    def __init__(self, sym, initial_time, final_time, dateformat,file_path, ticker, indicators, slippage, leverage,fees,capital,save_results,save_path,plot_results):
+    def __init__(self, sym, initial_time, final_time, dateformat,file_path, ticker, indicators, slippage, leverage,fees,capital,save_results,save_path,plot_results,data):
 
         """Period can be 1m-59m, 1h-23h, 1d-29d, 1M-11M, Xy"""
         super().__init__()
@@ -272,7 +272,11 @@ class Engine(Broker):
         
         self.pnl_history=pd.DataFrame(columns=['PNL'])
         self.p_history=pd.DataFrame(columns=['Price'])
-        self._get_data(file_path,ticker)
+        if data is None:
+            self._get_data(file_path,ticker)
+        else:
+            self.data=data
+
         self._backtest_settings(initial_time,final_time,dateformat)
         self.calculate_indicators = indicators
         self.indInit = True
@@ -300,8 +304,8 @@ class Engine(Broker):
             point = datetime.strptime(initial_time,dateformat)
             dataindex = self.data.index
             dataindex = pd.to_datetime(dataindex,dayfirst=True,format=dateformat)
-            diffs = np.array(list(dataindex)) - point
-            value = np.absolute(diffs).min()
+            diffs = np.absolute(np.array(list(dataindex)) - point)
+            value = diffs.min()
             initial = list(np.where(diffs==value)[0])[0]
             print(f"New origin: {dataindex[initial]}")
             converted = True
@@ -354,8 +358,7 @@ class Engine(Broker):
                 self._update_assets_value(closing_price[point])
             if self.calculate_indicators:
                 thread.join()   
-            self.strategy(opening_price[:point],closing_price[:point],
-            highest_price[:point], lowest_price[:point], volume, period_data[point])
+            self.strategy(opening_price[:point],closing_price[:point], highest_price[:point], lowest_price[:point], volume[:point], period_data[point])
             self._update_total_value()
             if self.total_value < closing_price[point] and not self.has_positions:
                 print("Wiped out")
@@ -379,7 +382,7 @@ class Engine(Broker):
         
 
 
-    def strategy(self, popen, pclose, phigh, plow, dtime):
+    def strategy(self, _open, close, high, low, vol, dtime):
         pass
         
 
@@ -394,13 +397,9 @@ class Engine(Broker):
     
         if file_path != "":
 
-            data = pd.read_csv(file_path,sep=';',header=None).rename(columns={0:'Date',
-            1:'Time',2:'Open',3:'High',4:'Low',5:'Close',6:'Volume'})
-
-            data['DateTime'] = data['Date'] + ' ' +data['Time']
-            data = data.drop(['Date','Time'],axis=1)
-
-            data = data.set_index('DateTime')
+            data = pd.read_csv(file_path,sep=',',header=None)
+            data = data.rename(columns={0:'Datetime',2:'Open',3:'High',4:'Low',5:'Close',6:'Volume'})
+            data = data.set_index('Datetime')
 
             data.loc[:,'Open':'Volume'] = data.loc[:,'Open':'Volume'].astype(float)
 

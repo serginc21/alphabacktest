@@ -1,16 +1,16 @@
 # alphabacktest -- under construction #
 -------
 
-> **DISCLAIMER: The results this backtesting software might produce may not be accurate, reliable or suppose any evidence for reassurance on a trading strategy. The results are indicative and might not be appropiate for trading purposes. Therefore, the creator does not bear any responsibility for any losses you might incur as a result of using this software.**
+> **DISCLAIMER: The results this backtesting software might produce may not be accurate, reliable or suppose any evidence ensuring a trading strategy profitability. The results are indicative and might not be appropiate for trading purposes. Therefore, the creator does not bear any responsibility for any losses anyone might incur as a result of using this software.**
 > 
 > **Please, be fully informed about the risks and costs associated with trading the financial markets, as it is one of the riskiest investment forms possible.**
 
 
 ## Description ##
 
-alphabacktest is a library that aims at bringing algorithmic trading to all Pyhton programmers via a very simple set of methods that allow backtesting any trading strategy anyone can come up with.
+alphabacktest is a library that aims at bringing algorithmic trading to all Pyhton programmers via a very simple set of methods that allow backtesting any trading strategy anyone can come up with, allowing external functions or modules.
 
-You can find below an example of the structure to use when working with alphabacktest. The module is designed to be inherited in a new class created by the user and call the methods within the class. ```Backtest()``` has the engine to run the backtest and calls ```strategy()``` at each point.
+You can find below an example of the structure to use when working with alphabacktest. The module is designed to be inherited in a new class created by the user and call the methods within the class. ```Backtest()``` has the engine to run the backtest chronologically and calls ```strategy()``` at each point in the data.
 
 ```python
 from alphabacktest import Backtest  
@@ -28,32 +28,32 @@ if __name__ == '__main__':
     mStrategy()      
 
 ```
-As seen, the usage is pretty straightforward, and does not require a huge effort for the user to import and/or work with it, being a smooth process and giving freedom to apply any strategy, from those based on technical indicators to machine learning, going through many different tools.
+As seen, the usage is pretty straightforward, and does not require a huge effort for the user to import and/or work with it, being a smooth process and giving freedom to apply any strategy, from those based on technical indicators to AI, going through many different tools.
 
 Regarding the data source (explained at Usage), getting the proper data is sometimes rather difficult, especially when one is looking for tight timeframes (1m,5m,15m...). This data is not usually free, so this module gives the chance to either get the data from Yahoo Finance or from a csv file that the user can have in their local memory from a purchase or own harvest. 
 
-For backtesting, one of the critical parameters is the time it takes for the system to complete the backtest, especially when there are a lot of data points to go through. This highly affects to those studies that aim at assessing long periods with low timeframes. This package has been optimised in order to follow a chronological flow while maintaining a high execution speed. The average time of a loop execution is 0.004s with a simple strategy. Therefore, if there are over 400000 points, the backtesting can be very slow (over 20m).
+For backtesting, one of the critical parameters is the time it takes for the system to complete the backtest, especially when there are a lot of data points to go through. This highly affects to those studies that aim at assessing long periods with low timeframes. This package has been optimised in order to follow a chronological order while maintaining a high execution speed. The average time of a loop execution is 0.004s with a simple strategy. Therefore, if there are over 400000 points, the backtesting can be very slow (over 20m).
 
 
 ## Installation ##
 
-You can fins all releases in [PyPI](https://pypi.org/project/alphabacktest/).
+You can find all releases in [PyPI](https://pypi.org/project/alphabacktest/).
 
 ```$ pip install alphabacktest```
 
 
 ### Requirements ###
 
-- Python 3.8.5+
+- Python 3.6+
 
 ### Dependencies ###
 
-As some of the features provided by the module are meant to be optional, **the installation of alphabacktest does not depend** on the following modules.
+As some of the features provided by the module are meant to be optional, **the installation of alphabacktest does not imply the collection** of TA-lib, dash nor pandas-datareader. Therefore, the package comes without these modules, which need to be installed by the user.
 
-
-- **TA-lib**. As there are sometimes difficulties when installing this module, there is an option for the backtest not to calculate any technical indicator (as all are based on TA-lib), so in that case you don't necessarily need to have it installed. In case you want to enable the calculation of technical indicators, you can find the module [here](https://github.com/mrjbq7/ta-lib).
-- **Dash**. alphabacktest uses dash in order to plot and display the results. However, this option can also be desactivated. In case you want it, you can find it [here](https://dash.plotly.com/installation). 
+- **TA-lib**. As there are sometimes difficulties when installing this module depending on the OS and IDE configuration, there is an option for the backtesting engine not to calculate any technical indicator (as all are based on TA-lib), so in that case you don't necessarily need to have it installed. In case you want to enable the calculation of technical indicators, you will indeed need the module you can find [here](https://github.com/mrjbq7/ta-lib). 
+- **Dash**. alphabacktest uses dash to plot and display the results. However, this option can also be desactivated. In case you do want it, you can find it [here](https://dash.plotly.com/installation). 
 - **Pandas datareader**. This module allows the program to import data from Yahoo Finance, you can find how to install it [here](https://github.com/pydata/pandas-datareader).
+
 
 ## Usage ## 
 
@@ -78,14 +78,13 @@ The ```super().__init__()``` is highly important here to define exactly how we w
 
 ```
 ### Data source ###
-The user has many options to configure the bactkester. On the first place, the data can be pulled from Yahoo Finance via [pandas_datareader](https://pandas-datareader.readthedocs.io/en/latest/); or it can be pulled from a local file.
+In the first place, the data can be pulled from Yahoo Finance via [pandas_datareader](https://pandas-datareader.readthedocs.io/en/latest/), or it can be imported from a local file.
 #### **From Yahoo Finance** ####
 In the first case, ```sym``` and ```file_path``` can be left as they are, while the ```ticker``` needs to be filled with the security symbol (according to the symbols Yahoo Finance uses). The ```dateformat``` of Yahoo Finance is the default format.
 ```python
     super().__init__(self,ticker="AAPL")
 
 ```
-Simple, right?
 
 #### **From a local CSV file** ####
 If it is the second case, the initialization varies a little and ```sym```, ```file_path``` and ```dateformat``` parameters need to be specified, whilst ```ticker``` can be left as it is. It is important that the dateformat is specified correctly, otherwise an error will be raised by the datetime module.
@@ -95,10 +94,29 @@ If it is the second case, the initialization varies a little and ```sym```, ```f
             dateformat="%Y-%m-%d %H:%M:%S",
             file_path="yourCSVfiledirectory.csv")
 ```
+However, the requirements for the file are very tight. The engine imports the data and assigns "Datetime","Open","High","Low","Close","Volume" values to the columns in that order. The format in Datetime column will be kept as a string and set as index whilst the format for Open-Volume will be converted to float. At last, the separator needs to be ','. If the format of your csv file is not this one, you can either transform it externally or provide your own data (which is recommended).
+
+#### **From a given DataFrame** ####
+The data format must be the same as the described above, meaning "Datetime" (str),"Open" (float),"High" (float),"Low" (float),"Close" (float),"Volume" (float) [**IN THIS ORDER**]. Datetime must be the dataframe's index.
+
+Example:
+```python
+global data 
+data = pd.read_csv('csv/file/path.csv')
+''' Data treatment'''
+data= data.set_index("Datetime")
+data.loc[:,'Open':'Close'] = data.loc[:,'Open':'Close'].astype(float)
+class myStrategy(Backtest):
+    def __init__(self):
+        super().__init__(sym='BTCUSD',data=data,initial_time="04/01/2020 01:00:00",dateformat="%d/%m/%Y %H:%M:%S")
+```
+
+
 ### Timeperiod ###
 
 #### **All the data available** ####
 If the aim of the user is to backtest the strategy for all the points in the data, the parameters ```initial_time``` and ```final_time``` should not be modified, they are already set as the very beginning and the last point respectively.
+
 
 #### **Specific timeframes** ####
 
@@ -243,6 +261,11 @@ The methods of the inherited class are the following ones.
   - **security**: str. Name of the security of the positions.
   - **_open**: bool. Refers to the state of the positions to be returned. If the method is called with ```_open=True```, the positions that will be returned are the currently open posigions; whilst if it is ```_open=False```, the method will return all positions regardless their state.
 
+
+
+Results
+--------
+The results are obtained via csv files and a dash app summary of the strategy performance that will be running on 
 
 
 Features

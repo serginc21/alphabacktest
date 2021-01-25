@@ -3,7 +3,7 @@ import os
 
 __author__ = """Sergi Novellas"""
 __email__ = 'sernocr@gmail.com'
-__version__ = '0.1.5'
+__version__ = '0.1.7'
 
 
 class Backtest(Engine):
@@ -20,7 +20,8 @@ class Backtest(Engine):
             capital=20000,
             save_results=True,
             save_path=os.getcwd(),
-            plot_results=True):
+            plot_results=True,
+            data=None):
 
         super().__init__(sym=sym,
             initial_time=initial_time,
@@ -35,4 +36,5 @@ class Backtest(Engine):
             capital=capital,
             save_results=save_results,
             save_path=save_path,
-            plot_results=plot_results)
+            plot_results=plot_results,
+            data=data)
