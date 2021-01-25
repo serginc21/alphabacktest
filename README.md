@@ -200,20 +200,20 @@ Example:
 The attributes of the inherited class are the following.
 
 
-- ```self.user_positions```. Pandas DataFrame containing the history of all positions
+- ```self.user_positions``` Pandas DataFrame containing the history of all positions
 
 <!---
 Add a table with an example of positions dataframe
 -->
-- ```self.user_portfolio```. Pandas DataFrame with the representation of the assets in the user's portfolio and the total value of their wallet.
+- ```self.user_portfolio``` Pandas DataFrame with the representation of the assets in the user's portfolio and the total value of their wallet.
 <!---
 Add a table with an example of positions dataframe
 -->
-- ```self.trades```. Pandas DataFrame with the information on the executed trades
+- ```self.trades``` Pandas DataFrame with the information on the executed trades
 <!---
 Add a table with an example of positions dataframe
 -->
-- ```self.orders```. Pandas DataFrame with the information of all orders either they are placed or not.
+- ```self.orders``` Pandas DataFrame with the information of all orders either they are placed or not.
 <!---
 Add a table with an example of positions dataframe
 -->
@@ -222,37 +222,37 @@ Add a table with an example of positions dataframe
 
 The methods of the inherited class are the following ones.
 
-- ```self.long_order(security, amount, dtime, price)```. Sends a long (buy) order to the broker. The parameters are:
+- ```self.long_order(security, amount, dtime, price)``` Sends a long (buy) order to the broker. The parameters are:
     - **security**: str. Name of the security to be traded, it is a must for the engine to account the traded asset.
     - **amount**: int. Quantity of contracts the order aims at. The minimum quantity is 1 and only whole (integer) numbers are accepted.
     - **dtime**: str. Time at which the long order is placed in the specified ```dateformat```.
     - **price**: float. Price at which the order is aimed. This price will not have any influence, but is useful for further analysis on the results of one's trades.
   
-- ```self.short_order(security, amount, dtime, price)```. Sends a short (sell) order to the broker. The parameters are:
+- ```self.short_order(security, amount, dtime, price)``` Sends a short (sell) order to the broker. The parameters are:
   - **security**: str. Name of the security to be traded, it is a must for the engine to account the traded asset.
   - **amount**: int. Quantity of contracts the order aims at. The minimum quantity is 1 and only whole (integer) numbers are accepted.
   - **dtime**: str. Time at which the short order is placed in the specified ```dateformat```.
   - **price**: float. Price at which the order is aimed. This price will not have any influence, but is useful for further analysis on the results of one's trades.
   
-- ```self.closing_order(p_id, dtime, double price)```. Sends a closing order to the broker. The parameters are:
+- ```self.closing_order(p_id, dtime, double price)``` Sends a closing order to the broker. The parameters are:
   - **pID**: str. This represents the position ID, which is generated randomly once a position starts after the trade is executed. It is placed at the Position DataFrame index and allows the selection of a particular position.
   - **dtime**: str. Time at which the closing order is placed in the specified ```dateformat```.
   - **price**: float. Price at which the order is aimed. This price will not have any influence, but is useful for further analysis on the results of one's trades.
 
 
-- ```self.has_positions()```. Returns a bool referring to the possession of an open contract. Returns ```True``` if there are open contracts and ```False``` if there is no open position. No parameters taken.
+- ```self.has_positions()``` Returns a bool referring to the possession of an open contract. Returns ```True``` if there are open contracts and ```False``` if there is no open position. No parameters taken.
 
 
-- ```self.get_positions(security,_open=True)```. Returns a pandas DataFrame with the positions related to the specified security. The parameters are:
+- ```self.get_positions(security,_open=True)``` Returns a pandas DataFrame with the positions related to the specified security. The parameters are:
   - **security**: str. Name of the security of the positions.
   - **_open**: bool. Refers to the state of the positions to be returned. If the method is called with ```_open=True```, the positions that will be returned are the currently open posigions; whilst if it is ```_open=False```, the method will return all positions regardless their state.
 
 
-- ```self.get_long_positions(security,_open=True)```. Returns a pandas Dataframe with only long positions. The parameters are:
+- ```self.get_long_positions(security,_open=True)``` Returns a pandas Dataframe with only long positions. The parameters are:
   - **security**: str. Name of the security of the positions.
   - **_open**: bool. Refers to the state of the positions to be returned. If the method is called with ```_open=True```, the positions that will be returned are the currently open posigions; whilst if it is ```_open=False```, the method will return all positions regardless their state.
 
-- ```self.get_short_positions(security,_open=True)```. Returns a pandas Dataframe with only short positions. The parameters are:
+- ```self.get_short_positions(security,_open=True)``` Returns a pandas Dataframe with only short positions. The parameters are:
   - **security**: str. Name of the security of the positions.
   - **_open**: bool. Refers to the state of the positions to be returned. If the method is called with ```_open=True```, the positions that will be returned are the currently open posigions; whilst if it is ```_open=False```, the method will return all positions regardless their state.
 
