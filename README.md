@@ -9,7 +9,7 @@
 
 alphabacktest is a library that aims at bringing algorithmic trading to all Pyhton programmers via a very simple set of methods that allow backtesting any trading strategy anyone can come up with.
 
-You can find below an example of the structure to use when working with ibacktest. The module is designed to be inherited in a new class created by the user and call the methods within the class. ```Backtest()``` has the engine to run the backtest and calls ```strategy()``` at each point.
+You can find below an example of the structure to use when working with alphabacktest. The module is designed to be inherited in a new class created by the user and call the methods within the class. ```Backtest()``` has the engine to run the backtest and calls ```strategy()``` at each point.
 
 ```python
 from alphabacktest import Backtest  
@@ -114,7 +114,7 @@ If the user wants to backtest certain scenarios, the ```initial_time``` and ```f
 ### Extras ###
 
 #### **Technical Indicators** ####
-The technical indicators that come with the ibacktest module are the SMA, EMA, RSI, Bollinger Bands and MACD. However if anyone would want to change it, you can also redefine the ```indicators()``` method.
+The technical indicators that come with the alphabacktest module are the SMA, EMA, RSI, Bollinger Bands and MACD. However if anyone would want to change it, you can also redefine the ```indicators()``` method.
 ```python
 from bcktclasses_cy import Backtest  
 
@@ -143,7 +143,7 @@ In order to simulate a real brokerage activity, the orders are not placed and ex
 
 Moreover, the parameters that are required by the engine to reproduce this behaviour are set by default but the user can change them and adapt it to what their broker sets as conditions. The attributes are the following.
 
-- ```slippage```. This parameter refers to the difference between the price at which the order is placed and the price at which the trade is executed [CFI](https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/slippage/). Although the slippage can really be zero, positive or negative, in iBacktest it is considered to always be playing against the interests of the trader.
+- ```slippage```. This parameter refers to the difference between the price at which the order is placed and the price at which the trade is executed [CFI](https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/slippage/). Although the slippage can really be zero, positive or negative, in alphabacktest it is considered to always be playing against the interests of the trader.
 
 
 - ```leverage```. [Investopedia](https://www.investopedia.com/terms/l/leverage.asp) describes the leverage as found in the following quote.
