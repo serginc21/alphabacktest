@@ -39,7 +39,7 @@ setup(
     },
     install_requires=['Click>=7.0', 'progressbar2>=3.53.1','pandas>=1.1.4','pandas_datareader>=0.9.0'],
     license="MIT license",
-    long_description=readme + '\n\n' + history,
+    long_description=readme + '\n\n',
     long_description_content_type="text/markdown",
     include_package_data=True,
     keywords='alphabacktest',
