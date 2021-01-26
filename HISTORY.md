@@ -126,4 +126,12 @@ First release on PyPI.
 0.1.7 (2021-01-25)
 </td>
 </tr>
+<tr>
+<td>
+0.1.8 (2021-01-26)
+</td>
+<td>
+Last release on PyPI.
+</td>
+</tr>
 </table>
