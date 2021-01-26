@@ -38,7 +38,6 @@ As seen, the usage is pretty straightforward, and does not require a huge effort
 
 Regarding the data source (explained at Usage), getting the proper data is sometimes rather difficult, especially when one is looking for tight timeframes (1m,5m,15m...). This data is not usually free, so this module gives the chance to either get the data from Yahoo Finance or from a csv file that the user can have in their local memory from a purchase or own harvest. 
 
-For backtesting, one of the critical parameters is the time it takes for the system to complete the backtest, especially when there are a lot of data points to go through. This highly affects to those studies that aim at assessing long periods with low timeframes. This package has been optimised in order to follow a chronological order while maintaining a high execution speed. The average time of a loop execution is 0.004s with a simple strategy. Therefore, if there are over 400000 points, the backtesting can be very slow (over 20m).
 
 
 ## Installation ##
