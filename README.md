@@ -1,4 +1,4 @@
-# alphabacktest -- under construction #
+# alphabacktest #
 -------
 [![PyPI version](https://badge.fury.io/py/alphabacktest.svg)](https://badge.fury.io/py/alphabacktest)
 [![Build Status](https://travis-ci.com/serginc21/alphabacktest.svg?branch=main)](https://travis-ci.com/serginc21/alphabacktest)
