@@ -13,16 +13,19 @@
 
 alphabacktest is a library that aims at bringing algorithmic trading to all Pyhton programmers via a very simple set of methods that allow backtesting any trading strategy anyone can come up with, allowing external functions or modules.
 
-You can find below an example of the structure to use when working with alphabacktest. The module is designed to be inherited in a new class created by the user and call the methods within the class. ```Backtest()``` has the engine to run the backtest chronologically and calls ```strategy()``` at each point in the data.
+You can find below an example of the structure to use when working with alphabacktest. The module is designed to be inherited in a new class created by the user and call the methods within the class. ```Backtest()``` has the engine to run the backtest chronologically and calls ```strategy()``` at each point in the data. The variables passed on to the function are ```list``` types with the previous quote for each point for all the prices (high,close...) and volume; except for ```dtime``` which is a string representing the current data point.
 
 ```python
 from alphabacktest import Backtest  
 
 class mStrategy(Backtest):
+    ''' Always call super().__init__() '''
     def __init__(self):
         super().__init__(ticker="AMZN")
 
+    ''' You can choose the parameters name'''
     def strategy(self,_open, close, high, low, vol, dtime):
+        ''' Fill in your strategy '''
         if not self.has_positions():
             q = int(self.free_balance / close[-1])
             self.long_order(security=self.symbol, amount=q, dtime=dtime, price=close[-1])
