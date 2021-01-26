@@ -1,10 +1,10 @@
 # alphabacktest #
--------
 [![PyPI version](https://badge.fury.io/py/alphabacktest.svg)](https://badge.fury.io/py/alphabacktest)
 [![Build Status](https://travis-ci.com/serginc21/alphabacktest.svg?branch=main)](https://travis-ci.com/serginc21/alphabacktest)
 [![Coverage Status](https://coveralls.io/repos/github/serginc21/alphabacktest/badge.svg?branch=main)](https://coveralls.io/github/serginc21/alphabacktest?branch=main)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alphabacktest?style=plastic)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/alphabacktest)
+-------
 > **DISCLAIMER: The results this backtesting software might produce may not be accurate, reliable or suppose any evidence ensuring a trading strategy profitability. The results are indicative and might not be appropiate for trading purposes. Therefore, the creator does not bear any responsibility for any losses anyone might incur as a result of using this software.**
 > 
 > **Please, be fully informed about the risks and costs associated with trading the financial markets, as it is one of the riskiest investment forms possible.**
