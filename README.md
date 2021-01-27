@@ -104,14 +104,14 @@ The data format must be the same as the described above, meaning "Datetime" (str
 
 Example:
 ```python
-global data 
 data = pd.read_csv('csv/file/path.csv')
 ''' Data treatment'''
 data= data.set_index("Datetime")
 data.loc[:,'Open':'Close'] = data.loc[:,'Open':'Close'].astype(float)
 class myStrategy(Backtest):
-    def __init__(self):
+    def __init__(self,data):
         super().__init__(sym='BTCUSD',data=data,initial_time="04/01/2020 01:00:00",dateformat="%d/%m/%Y %H:%M:%S")
+myStrategy(data)
 ```
 
 
