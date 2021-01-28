@@ -75,7 +75,7 @@ class DashApp():
         ## Performance Graph creation
         self.myfig = go.Figure(layout=go.Layout(height=500,width=850,margin=go.layout.Margin(l=0,r=0,b=0,t=20)))
         self.myfig.add_trace(go.Scatter(x=self.pnls['Datetime'],y=self.pnls['PNL'],name='PNL'))
-        self.myfig.add_trace(go.Scatter(x=self.pnls['Datetime'],y=self.pnls['BDiff'],name='Benchmarked'))
+        self.myfig.add_trace(go.Scatter(x=self.pnls['Datetime'],y=self.pnls['BPrice'],name='Benchmarked'))
         self.myfig.update_xaxes(rangeslider_visible=True,rangebreaks=[{ 'pattern': 'day of week', 'bounds':["sat", "sun"]}])
         self.myfig.update_layout(hovermode='x',showlegend=False)
 
@@ -227,3 +227,5 @@ class DashApp():
         ])
         self.app.run_server(debug=False)
 
+
+# DashApp()

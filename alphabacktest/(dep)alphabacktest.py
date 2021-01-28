@@ -45,33 +45,34 @@ class Portfolio(Account):
     def __init__(self):
         super().__init__()
         self.user_positions = pd.DataFrame(columns=['Security','OPrice','ODate','CPrice','CDate','Amount','PNL','Performance'])
-        self.closed_positions = pd.DataFrame(columns=['Security','OPrice','ODate','CPrice','CDate','Amount','PNL','Performance'])
 
 
     def get_positions(self, security, _open=True):
+        positions = self.user_positions[self.user_positions['Security']==security]
         if _open:
-            return self.user_positions
+            return positions[positions["CPrice"]=="-"]
         else:
-            return pd.concat([self.closed_positions, self.user_positions])
+            return positions
 
 
     def get_long_positions(self, _open=True):
-
+        positions = self.user_positions[self.user_positions['Amount']>0]
         if _open:
-            return self.user_positions[self.user_positions['Amount']>0]
+            return positions[positions["CPrice"]=='-']
         else:
-            return pd.concat([self.closed_positions[self.closed_positions['Amount']>0], self.user_positions[self.user_positions['Amount']>0]])
+            return positions
 
     def get_short_positions(self, _open=True):
+        positions = self.user_positions[self.user_positions['Amount']<0]
         if _open:
-            return self.user_positions[self.user_positions['Amount']<0]
+            return positions[positions["CPrice"]=='-']
         else:
-            return pd.concat([self.closed_positions[self.closed_positions['Amount']<0], self.user_positions[self.user_positions['Amount']<0]])
+            return positions
 
 
     def has_positions(self):
-        positions = self.get_positions(security=self.symbol,_open=True)
-        if positions.shape[0] > 0:
+        positions = self.get_positions(security=self.symbol)
+        if positions[positions["CPrice"]=='-'].shape[0] > 0:
             return True
         else:
             return False
@@ -84,9 +85,7 @@ class Portfolio(Account):
             oprice = oprice *(1+self.slippage)
             bamount = amount * (self.leverage-1)
             tamount = bamount + amount
-            newBorrowed = pd.Series(data=[pID, bamount*oprice],index=self.borrowed_book.columns)
-            newBorrowed.name = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
-            self.borrowed_book = self.borrowed_book.append(newBorrowed)
+            self.borrowed_book.loc[''.join(random.choices(string.ascii_letters+string.digits,k=7)),:] = pd.DataFrame([[pID, bamount*oprice]],columns=['Position ID','Value']).loc[0,:]
             self.borrowed_money = self.borrowed_book['Value'].sum()
 
             self.user_positions.loc[pID,:] = [sec, oprice, odate, '-','-',tamount,-tamount*oprice*self.fees_perc, 0]
@@ -108,6 +107,7 @@ class Portfolio(Account):
 
         self.free_balance -= (tamount * oprice * self.fees_perc + amount*oprice)
         self.costs_fees += tamount * oprice * self.fees_perc
+        print(f'POSITION OPENED| Costs: USD {round(tamount * oprice * self.fees_perc+oprice*self.slippage,2)} | Borrowed: USD {round(bamount*oprice,2)} | Invested: USD {round(amount*oprice,2)}')
         if sec in self.user_portfolio['Security'].values:
 
             self._update_assets_amount(oprice)
@@ -123,6 +123,7 @@ class Portfolio(Account):
 
         self._update_position(price)
         tamount= self.user_positions.loc[position, 'Amount']
+        bamount = tamount - tamount/self.leverage
         bmID = self.borrowed_book.index[self.borrowed_book['Position ID']==position].to_list()[0]
         if tamount > 0:
             self.user_positions.loc[position, 'CPrice'] = price
@@ -130,19 +131,16 @@ class Portfolio(Account):
             self.free_balance += (self.user_positions.loc[position, 'Amount']) * price - self.borrowed_book.loc[bmID,'Value']
 
         else:
+            
             self.user_positions.loc[position, 'CPrice'] = price
             self.user_positions.loc[position, 'CDate'] = dtime
             ohID = self.on_hold_book.index[self.on_hold_book['Position ID']==position].to_list()[0]
-            # print(f"GIVING BACK TO FREE BALANCE: USD {self.on_hold_book.loc[ohID,'Value']/2 - abs(self.user_positions.loc[position, 'Amount']*price)}")
+            print(f"GIVING BACK TO FREE BALANCE: USD {self.on_hold_book.loc[ohID,'Value']/2 - abs(self.user_positions.loc[position, 'Amount']*price)}")
             self.free_balance += self.on_hold_book.loc[ohID,'Value'] - abs(self.user_positions.loc[position, 'Amount']*price) - self.borrowed_book.loc[bmID,"Value"]
             self.on_hold_book = self.on_hold_book.drop(ohID,axis=0)
             self.on_hold = self.on_hold_book['Value'].sum()
         
-        closedPosition = pd.Series(data=self.user_positions.loc[position,:],index=self.closed_positions.columns)
-        closedPosition.name = position
-        self.closed_positions = self.closed_positions.append(closedPosition)
-
-        self.user_positions.drop(labels=[position],axis=0,inplace=True)
+        
         self.borrowed_book = self.borrowed_book.drop(bmID,axis=0)
         self.borrowed_money =self.borrowed_book['Value'].sum()
         
@@ -152,16 +150,19 @@ class Portfolio(Account):
 
 
     def _update_position(self, cprice):
-        for pID in self.user_positions.index:
-            oPrice = self.user_positions.loc[pID,'OPrice']
-            pAmount = self.user_positions.loc[pID,'Amount']
-            if pAmount >0:
-                self.user_positions.loc[pID,'PNL'] = -abs(pAmount*oPrice*self.fees_perc) + (cprice - oPrice)*abs(pAmount)
-                self.user_positions.loc[pID,'Performance'] = self.user_positions.loc[pID,'PNL'] / abs(oPrice * pAmount) * self.leverage *100
-            else:
-                self.user_positions.loc[pID,'PNL'] = -abs(pAmount*oPrice*self.fees_perc) + (oPrice - cprice)*abs(pAmount)
-                self.user_positions.loc[pID,'Performance'] = self.user_positions.loc[pID,'PNL'] / abs(oPrice * pAmount)* self.leverage * 100
 
+        for pID in self.user_positions.index:
+            if self.user_positions.loc[pID,'CPrice'] == '-':
+                oPrice = self.user_positions.loc[pID,'OPrice']
+                pAmount = self.user_positions.loc[pID,'Amount']
+                if pAmount >0:
+                    self.user_positions.loc[pID,'PNL'] = -abs(pAmount*oPrice*self.fees_perc) + (cprice - oPrice)*abs(pAmount)
+                    self.user_positions.loc[pID,'Performance'] = self.user_positions.loc[pID,'PNL'] / abs(oPrice * pAmount) * self.leverage *100
+                else:
+                    self.user_positions.loc[pID,'PNL'] = -abs(pAmount*oPrice*self.fees_perc) + (oPrice - cprice)*abs(pAmount)
+                    self.user_positions.loc[pID,'Performance'] = self.user_positions.loc[pID,'PNL'] / abs(oPrice * pAmount)* self.leverage * 100
+            else:
+                pass
 
     def _update_assets_amount(self, price):
 
@@ -188,19 +189,14 @@ class Trader(Portfolio):
         self.symbol = ''
 
     def long_order(self, security, amount, dtime, price):
-        newOrder = pd.Series(data=[self.symbol, 'Buy',dtime, price ,amount, 'TBExecuted'],index=self.orders.columns)
-        newOrder.name = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
-        self.orders = self.orders.append(newOrder)
+        self.orders.loc[''.join(random.choices(string.ascii_letters+string.digits,k=7)),:] = [self.symbol, 'Buy',dtime, price ,amount, 'TBExecuted']
 
     def short_order(self, security, amount, dtime, price):
-        newOrder = pd.Series(data=[self.symbol, 'Sell',dtime, price ,amount, 'TBExecuted'],index=self.orders.columns)
-        newOrder.name = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
-        self.orders = self.orders.append(newOrder)
-
+        self.orders.loc[''.join(random.choices(string.ascii_letters+string.digits,k=7)),:] = [self.symbol, 'Sell',dtime, price ,amount, 'TBExecuted']
+        
     def closing_order(self, p_id, dtime, price):
-        newOrder = pd.Series(data=[self.symbol, 'Close#'+p_id,dtime, price ,self.user_positions.loc[p_id, 'Amount'], 'TBExecuted'],index=self.orders.columns)
-        newOrder.name = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
-        self.orders = self.orders.append(newOrder)
+
+        self.orders.loc[''.join(random.choices(string.ascii_letters+string.digits,k=7)),:] = [self.symbol, 'Close#'+p_id,dtime, price ,self.user_positions.loc[p_id, 'Amount'], 'TBExecuted']
 
 
 
@@ -210,33 +206,37 @@ class Broker(Trader):
         self.trades = pd.DataFrame(columns=['Security', 'Type', 'Datetime', 'Price', 'Amount'])
 
     def _order_execution(self, dtime, price):
-        orderstba = self.orders[self.orders['Status']=='TBExecuted']
-        for oID in orderstba.index:
-            if 'Close#' in self.orders.loc[oID,'Type']:
-                self.__execute_closing_order(dtime, price, oID)
-            else:
-                self.__execute_opening_order(dtime, price, oID)
+        for oID in self.orders.index:
+            if self.orders.loc[oID,'Status'] == 'TBExecuted':
+                if 'Close#' in self.orders.loc[oID,'Type']:
+                    self.__execute_closing_order(dtime, price, oID)
+                else:
+                    self.__execute_opening_order(dtime, price, oID)
 
         
 
     def __execute_opening_order(self, dtime, price, oID):
         if abs(self.orders.loc[oID,'Amount'] * price) > self.free_balance or self.on_hold/self.leverage > 1*self.total_value/2:
-            self.orders.loc[oID,'Status'] = 'NotExecutedIF'
+            print('Insufficient funds ')
+            self.orders.loc[oID,'Status'] = 'NotExecuted'
         elif self.orders.loc[oID,'Amount'] == 0:
-            self.orders.loc[oID,'Status'] = 'NotExecutedN'
+            print('Null quantity')
+            self.orders.loc[oID,'Status'] = 'NotExecuted'
         else:
+            
             if self.orders.loc[oID,'Type'] == 'Buy':
+
                 self._open_position(self.symbol, price, dtime, self.orders.loc[oID,'Amount'])
+
                 self.orders.loc[oID,'Status'] = ' Executed'
-                newTrade = pd.Series(data=[self.orders.loc[oID,'Security'],self.orders.loc[oID,'Type'],self.orders.loc[oID,'Datetime'],self.orders.loc[oID,'Price'],self.orders.loc[oID,'Amount']],index=self.trades.columns)
-                newTrade.name = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
-                self.trades = self.trades.append(newTrade)
+
+                self.trades.loc[''.join(random.choices(string.ascii_letters+string.digits,k=7)),:] = [self.orders.loc[oID,'Security'],self.orders.loc[oID,'Type'],self.orders.loc[oID,'Datetime'],self.orders.loc[oID,'Price'],self.orders.loc[oID,'Amount']]
             else:
                 self._open_position(self.symbol, price, dtime, self.orders.loc[oID,'Amount'],ptype='Sell')
                 self.orders.loc[oID,'Status'] = 'Executed'
-                newTrade = pd.Series(data=[self.orders.loc[oID,'Security'],self.orders.loc[oID,'Type'],self.orders.loc[oID,'Datetime'],self.orders.loc[oID,'Price'],self.orders.loc[oID,'Amount']],index=self.trades.columns)
-                newTrade.name = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
-                self.trades = self.trades.append(newTrade)
+
+                self.trades.loc[''.join(random.choices(string.ascii_letters+string.digits,k=7)),:] = [self.orders.loc[oID,'Security'],self.orders.loc[oID,'Type'],self.orders.loc[oID,'Datetime'],self.orders.loc[oID,'Price'],self.orders.loc[oID,'Amount']]
+
 
     def __execute_closing_order(self, dtime, price, oID):
 
@@ -245,11 +245,12 @@ class Broker(Trader):
             self._close_position(position, dtime, price)
             self.orders.loc[oID,'Status'] = 'Executed'
             tID = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
-            newTrade = pd.Series(data=[self.orders.loc[oID,'Security'],self.orders.loc[oID,'Type'],self.orders.loc[oID,'Datetime'],self.orders.loc[oID,'Price'],self.orders.loc[oID,'Amount']],index=self.trades.columns)
-            newTrade.name = tID
-            self.trades = self.trades.append(newTrade)
+            self.trades.loc[tID,:] = [self.orders.loc[oID,'Security'],self.orders.loc[oID,'Type'],self.orders.loc[oID,'Datetime'],self.orders.loc[oID,'Price'],self.orders.loc[oID,'Amount']]
         else:
             self.orders.loc[oID,'Status'] = 'NotExecuted'
+
+
+
 
 
 
@@ -269,8 +270,8 @@ class Engine(Broker):
         else:
             self.symbol = sym
         
-        self.pnl_history=pd.DataFrame(columns=["PNL"])
-        self.p_history=pd.DataFrame(columns=["Price"])
+        self.pnl_history=pd.DataFrame(columns=['PNL'])
+        self.p_history=pd.DataFrame(columns=['Price'])
         if data is None:
             self._get_data(file_path,ticker)
         else:
@@ -328,8 +329,11 @@ class Engine(Broker):
         self.b_index = [initial, final]
 
 
-    def __driver(self,dateformat):
+
         
+
+    def __driver(self,dateformat):
+
         opening_price = self.data.iloc[self.b_index[0]-500:self.b_index[1],0].tolist()
         closing_price = self.data.iloc[self.b_index[0]-500:self.b_index[1],3].tolist()
         highest_price = self.data.iloc[self.b_index[0]-500:self.b_index[1],1].tolist()
@@ -337,17 +341,14 @@ class Engine(Broker):
         volume = self.data.iloc[self.b_index[0]-500:self.b_index[1],4].tolist()
         period_data = self.data.index[self.b_index[0]-500:self.b_index[1]]
         period = range(500,len(opening_price))
-        
+
         for point, _ in zip(period,progressbar.progressbar(range(period_data.shape[0]))):
+
             dpoint = period_data[point]
-            pnl = pd.Series(data=[round((self.total_value/self.capital-1)*100,2)],index=self.pnl_history.columns)
-            pnl.name = dpoint
-            self.pnl_history = self.pnl_history.append(pnl)
-            p = pd.Series(data=[closing_price[point]],index=self.p_history.columns)
-            p.name = dpoint
-            self.p_history = self.p_history.append(p)
+            self.pnl_history.loc[dpoint,'PNL'] = round((self.total_value/self.capital-1)*100,2)
+            self.p_history.loc[dpoint,'Price'] = closing_price[point]
             if self.calculate_indicators:
-                thread = threading.Thread(target=self.indicators,args=[closing_price[(point-500):point]])
+                thread = threading.Thread(target=self.indicators,args=[closing_price[:point]])
                 thread.start()
             if self.orders.shape[0] > 0:
                 self._order_execution(period_data[point], opening_price[point])
@@ -369,7 +370,7 @@ class Engine(Broker):
         from talib import RSI, BBANDS, MACD, EMA, SMA
 
         
-        ind_data = np.array(ind_data)
+        ind_data = np.array(ind_data[-500:])
 
         self.RSI = RSI(ind_data, timeperiod=14)
         self.UBB, self.MBB, self.LBB = BBANDS(ind_data, timeperiod=20, nbdevup= 2.5, nbdevdn=2.5, matype=0)
@@ -412,9 +413,10 @@ class Engine(Broker):
             self.data = data.iloc[:,:-1]
 
 
+
     def _save_account_books(self, save_path, dateformat):
 
-        print('----- Saving...')
+        print('Saving...')
         path = save_path + '/backtest_results'
         try:
             files = os.listdir(path)
@@ -425,36 +427,49 @@ class Engine(Broker):
 
         self.orders.to_csv(save_path+'/backtest_results/orders.csv',index_label="ID")
         self.trades.to_csv(save_path+'/backtest_results/trades.csv',index_label="ID")
-        total_positions = pd.concat([self.closed_positions,self.user_positions])
-        total_positions.to_csv(save_path+'/backtest_results/userpositions.csv',index_label="ID")
+        self.user_positions.to_csv(save_path+'/backtest_results/userpositions.csv',index_label="ID")
         self.user_portfolio.to_csv(save_path+'/backtest_results/userportfolio.csv',index=False)
         
-        self.pnl_history["BDiff"]= (self.p_history['Price'] - self.p_history.iloc[0,0]) / self.p_history.iloc[0,0] * 100
+        mdf = self.p_history
+        mdf['Diff'] = (mdf['Price'] - mdf.iloc[0,0]) / mdf.iloc[0,0] * 100
+        first_row = True
+        for i in self.pnl_history.index:
+            if first_row == True:
+                with open(save_path+'/backtest_results/pnls.csv','a') as f:
+                    f.writelines('Datetime,PNL,BPrice\n')
+                first_row = False
 
-        self.pnl_history.to_csv(save_path+'/backtest_results/pnls.csv',index_label='Datetime')
+            pnl = self.pnl_history.loc[i,'PNL']
+            p = self.p_history.loc[i,'Diff']
+
+            
+            with open(save_path+'/backtest_results/pnls.csv','a') as f:
+                f.writelines('{},{},{}\n'.format(i,pnl,p))
+
+
         _data = self.data.iloc[self.b_index[0]:self.b_index[1],:]
         _data.to_csv(save_path+'/backtest_results/prices.csv',index_label="Datetime")
 
         positions_stats = pd.DataFrame(columns=["PNLp","Duration"])
 
-        for position in total_positions.index:
-            if total_positions.loc[position,"CDate"] == "-":
-                positions_stats.loc[position,"Duration"] = datetime.strptime(_data.index[-1],dateformat) - datetime.strptime(total_positions.loc[position,"ODate"],dateformat)
+        for position in self.user_positions.index:
+            if self.user_positions.loc[position,"CDate"] == "-":
+                positions_stats.loc[position,"Duration"] = datetime.strptime(_data.index[-1],dateformat) - datetime.strptime(self.user_positions.loc[position,"ODate"],dateformat)
             else:
-                positions_stats.loc[position,"Duration"] = datetime.strptime(total_positions.loc[position,"CDate"],dateformat) - datetime.strptime(total_positions.loc[position,"ODate"],dateformat)
+                positions_stats.loc[position,"Duration"] = datetime.strptime(self.user_positions.loc[position,"CDate"],dateformat) - datetime.strptime(self.user_positions.loc[position,"ODate"],dateformat)
 
         positions_stats["Duration"] = (positions_stats["Duration"]/np.timedelta64(1, 'm')).astype(int)
-        positions_stats["PNLp"] = total_positions["Performance"]
+        positions_stats["PNLp"] = self.user_positions["Performance"]
         positions_stats.to_csv(save_path+'/backtest_results/positions_stats.csv')
 
         stats = pd.DataFrame(columns=['Parameter','Value'])
 
         stats.loc[0,:] = ['Number of trades',self.trades.shape[0]]
-        stats.loc[1,:] = ['Number of closed positions',self.closed_positions.shape[0]]
-        stats.loc[2,:] = ['Number of open positions',self.user_positions.shape[0]]
-        stats.loc[3,:] = ['Best trade',round(total_positions["Performance"].max(),2)]
-        stats.loc[4,:] = ['Worst trade',round(total_positions["Performance"].min(),2)]
-        stats.loc[5,:] = ['Percent profitable (%)',round((self.closed_positions["Performance"]>0).sum()/self.closed_positions.shape[0]*100,2)]
+        stats.loc[1,:] = ['Number of closed positions',self.user_positions[self.user_positions["CPrice"]!='-'].shape[0]]
+        stats.loc[2,:] = ['Number of open positions',self.user_positions[self.user_positions["CPrice"]=='-'].shape[0]]
+        stats.loc[3,:] = ['Best trade',round(self.user_positions["Performance"].max(),2)]
+        stats.loc[4,:] = ['Worst trade',round(self.user_positions["Performance"].min(),2)]
+        stats.loc[5,:] = ['Percent profitable (%)',round((self.user_positions[self.user_positions["CPrice"]!='-']["Performance"]>0).sum()/self.user_positions[self.user_positions["CPrice"]!='-'].shape[0]*100,2)]
 
         stats.loc[6,:] = ['Final PNL (%)',self.pnl_history.iloc[-1,0]]
         SR = self.pnl_history["PNL"].mean()/self.pnl_history["PNL"].std()
@@ -471,7 +486,7 @@ class Engine(Broker):
         
 
         stats.loc[8,:] = ['MDD (%)',mdd]
-        perf = total_positions["Performance"].astype(float)
+        perf = self.user_positions["Performance"].astype(float)
         GTPR = perf[perf>0].sum()/abs(perf[perf<0].sum())
         stats.loc[9,:] = ["Gain to Pain Ratio",round(GTPR,2)]
         if positions_stats["Duration"].shape[0] == 1:
@@ -491,4 +506,5 @@ class Engine(Broker):
 
             
         stats.loc[11,:] = ["Average pnl (%)",str(round(positions_stats["PNLp"].mean(),2))+"±"+str(round(positions_stats["PNLp"].std(),2))]
+
         stats.to_csv(save_path+'/backtest_results/stats.csv',index=False)
