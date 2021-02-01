@@ -133,8 +133,9 @@
     font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
     line-height: 1.6;
     font-weight: 400;
+    background-color: #444444;
     font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: rgb(50, 50, 50); }
+    color: 'white'; }
   
 
   
@@ -367,7 +368,9 @@
     margin-top: 3rem;
     margin-bottom: 3.5rem;
     border-width: 0;
-    border-top: 1px solid #E1E1E1; }
+    border-top: 1px solid 'red'; }
+
+
   
   
   /* Clearing
