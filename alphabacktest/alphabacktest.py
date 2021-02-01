@@ -454,7 +454,7 @@ class Engine(Broker):
         stats.loc[2,:] = ['Number of open positions',self.user_positions.shape[0]]
         stats.loc[3,:] = ['Best trade',round(total_positions["Performance"].max(),2)]
         stats.loc[4,:] = ['Worst trade',round(total_positions["Performance"].min(),2)]
-        stats.loc[5,:] = ['Percent profitable (%)',round((self.closed_positions["Performance"]>0).sum()/self.closed_positions.shape[0]*100,2)]
+        stats.loc[5,:] = ['Profitable trades(%)',round((self.closed_positions["Performance"]>0).sum()/self.closed_positions.shape[0]*100,2)]
 
         stats.loc[6,:] = ['Final PNL (%)',self.pnl_history.iloc[-1,0]]
         SR = self.pnl_history["PNL"].mean()/self.pnl_history["PNL"].std()
