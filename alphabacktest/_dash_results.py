@@ -256,7 +256,6 @@ class DashApp():
 
                     html.Div(style={'float':'right','width':'35%','margin-right':'5%','min-width':'300px'},children=[
                         
-                        # html.Div(style={'float':'left','width':'50%'},children=[html.H4(children='Trades', style={'textAlign':'center','width':'100%'}), self.generate_table_1(self.trades),]),
                         html.Div(style={},children=[
                             html.H3(children='Trades', style={'textAlign':'left','color':'#2069e0','margin':'0'}), 
                             dash_table.DataTable(
