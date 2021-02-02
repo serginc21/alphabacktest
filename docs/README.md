@@ -6,7 +6,7 @@
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/alphabacktest)
 [![Documentation Status](https://readthedocs.org/projects/alphabacktest/badge/?version=latest)](https://alphabacktest.readthedocs.io/en/latest/?badge=latest)
 -------
-> **DISCLAIMER: The results this backtesting software might produce may not be accurate, reliable or suppose any evidence ensuring a trading strategy profitability. The results are indicative and might not be appropiate for trading purposes. Therefore, the creator does not bear any responsibility for any losses anyone might incur as a result of using this software.**
+> **DISCLAIMER: The results this backtesting software might produce may not be accurate, reliable or suppose any evidence ensuring the profitability of an algorithmic trading strategy. The results are indicative and might not be appropiate for trading purposes. Therefore, the creator does not bear any responsibility for any losses anyone might incur as a result of using this software.**
 > 
 > **Please, be fully informed about the risks and costs associated with trading the financial markets, as it is one of the riskiest investment forms possible.**
 
@@ -15,7 +15,7 @@
 
 alphabacktest is a library that aims at bringing algorithmic trading to all Pyhton programmers via a very simple set of methods that allow backtesting any trading strategy anyone can come up with, allowing external functions or modules.
 
-You can find below an example of the structure to use when working with alphabacktest. The module is designed to be inherited in a new class created by the user and call the methods within the class. ```Backtest()``` has the engine to run the backtest chronologically and calls ```strategy()``` at each point in the data. The variables passed on to the function are ```list``` types with the previous quote for each point for all the prices (high,close...) and volume; except for ```dtime``` which is a string representing the current data point.
+You can find below an example of the structure to use when working with alphabacktest. The module is designed to be inherited in a new class created by the user and call the methods within the class. ```Backtest()``` has the engine to run the backtest chronologically and calls ```strategy()``` at each point in the data. The variables passed on to the function are ```list``` types with the previous quotes at each point for all the prices (high,close...) and volumes; except for ```dtime``` which is a string representing the current data point.
 
 ```python
 from alphabacktest import Backtest  
@@ -63,7 +63,7 @@ As some of the features provided by the module are meant to be optional, **the i
 
 ## Usage ## 
 
-The ```super().__init__()``` is highly important here to define exactly how we want our backtest to be. It is customisable to an extent and allows multiple features to be desactivated or included.
+The ```super().__init__()``` is highly important as it defines exactly the settings of the backtest. It is customisable to an extent and allows multiple features to be desactivated or included.
 
 ```python
     super().__init__(self, 
@@ -115,7 +115,20 @@ class myStrategy(Backtest):
 myStrategy(data)
 ```
 
+Data example:
+```python
+                        Open     High      Low    Close  Volume
+Datetime                                                       
+01/04/2007 17:15:00  3746.71  3850.91  3707.23  3843.52   4324200990.0
+01/04/2007 17:30:00  3849.22  3947.98  3817.41  3943.41   5244856835.0
+01/04/2007 17:45:00  3931.05  3935.69  3826.22  3836.74   4530215218.0
+01/04/2007 18:00:00  3832.04  3865.93  3783.85  3857.72   4847965467.0
+01/04/2007 18:15:00  3851.97  3904.90  4093.30  3836.90   5137609823.0
+...                      ...      ...      ...      ...     ...
 
+[m rows x n columns]
+
+```
 ### Timeperiod ###
 
 #### **All the data available** ####
@@ -129,7 +142,7 @@ If the user wants to backtest certain scenarios, the ```initial_time``` and ```f
 ```python
     super().__init__(self, 
             sym="GOLD",
-            file_path="yourCSVfiledirectory.csv"),
+            data=your_data,
             initial_time="01/01/2015 00:00:00",
             final_time="01/01/2020 23:55:00",
             dateformat="%Y-%m-%d %H:%M:%S",
@@ -168,20 +181,20 @@ In order to simulate a real brokerage activity, the orders are not placed and ex
 
 Moreover, the parameters that are required by the engine to reproduce this behaviour are set by default but the user can change them and adapt it to what their broker sets as conditions. The attributes are the following.
 
-- ```slippage```. This parameter refers to the difference between the price at which the order is placed and the price at which the trade is executed [CFI](https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/slippage/). Although the slippage can really be zero, positive or negative, in alphabacktest it is considered to always be playing against the interests of the trader.
+- ```slippage```. This parameter refers to the difference between the price at which the order is placed and the price at which the trade is executed ([CFI](https://corporatefinanceinstitute.com/resources/knowledge/trading-investing/slippage/)). Although the slippage can really be zero, positive or negative, in alphabacktest it is considered to always be playing against the interests of the trader.
 
 
-- ```leverage```. [Investopedia](https://www.investopedia.com/terms/l/leverage.asp) describes the leverage as found in the following quote.
+- ```leverage```. [Investopedia](https://www.investopedia.com/terms/l/leverage.asp) describes the leverage as follows.
   >Leverage refers to the use of debt (borrowed funds) to amplify returns from an investment or project.
     
-    In this module the leverage is a multiplier that refers to the *n* times your capital is increased by the debt. Leverage can range from 1 (meaning no debt) up to 400 depending on the financial product. (Again, thanks [Investopedia](https://www.investopedia.com/terms/m/maximum-leverage.asp)). Nonetheless, this number is usually set by your broker.
+    In this module the leverage is a multiplier that refers to the *n* times your capital is increased by taking debt. Leverage can range from 1 (meaning no debt) up to 400 depending on the financial product. (Again, thanks [Investopedia](https://www.investopedia.com/terms/m/maximum-leverage.asp)). Nonetheless, this number is usually set by your broker.
             
-- ```fees```. This refers to the commission the broker is charging per unit of currency, meaning that it will be dependent on the amount the trader allocates to the trade. 
+- ```fees```. This refers to the commissions the broker is charging per unit of capital invested, meaning that it will be dependent on the amount the trader allocates to the trade. 
 
--```capital```. Total initial amount of liquidity the account is provided with. It is not considered to be in any specific currency; just the currency the security is traded with. Therefore, the backtest will not consider fluctuations due to the FX markets evolution.
+- ```capital```. Total initial amount of liquidity the account is provided with. It is not considered to be in any specific currency; just the currency the security is traded with. Therefore, the backtest will not consider fluctuations due to the FX markets evolution.
 
 #### **Results treatment** ####
-The default configuration is set to save the results in csv files inside a folder the engine creates in the cwd and it runs a [Dash](https://dash.plotly.com) app where the results are plotted and presented. In case the user wanted to desactivate any of this features, the initialisation allows it. Setting ```save_results``` or ```plot_results``` (bool) as ```False```. Moreover, if the user wanted to change the directory where the results are stored, ```save_path``` (str) is the parameter to customize.
+The default configuration is set to save the results in csv files inside a folder named ```backtest_results``` the engine creates in the cwd and it runs a [Dash](https://dash.plotly.com) app where the results are plotted and the statistics presented. In case the user wanted to desactivate any of this features, the initialisation allows it by setting ```save_results``` or ```plot_results``` (bool) as ```False```. Moreover, if the user wanted to change the directory where the results are stored, ```save_path``` (str) is the parameter to customize.
 
 Example: 
 
@@ -207,20 +220,69 @@ Example:
 The attributes of the inherited class are the following.
 
 
-- ```self.user_positions``` Pandas DataFrame containing the history of all positions
+- ```self.user_positions``` Pandas DataFrame containing the open positions.
 
-<!---
-Add a table with an example of positions dataframe
--->
+Example:
+```
+        Security       OPrice                ODate CPrice CDate Amount       PNL Performance
+btoHxGN    SP500  3653.884575  30/11/2020 20:30:00      -     -    -20  4.037615    0.110502
+```
+
+
+- ```self.closed_positions``` Pandas DataFrame containing the history of the closed positions.
+
+Example:
+```
+        Security       OPrice                ODate   CPrice                CDate Amount         PNL  Performance
+l7h7eRx    SP500  3517.898175  12/10/2020 10:30:00  3482.75  14/10/2020 11:00:00    -20  699.445602    19.882486
+eO9fL5Q    SP500  3444.844450  15/10/2020 04:00:00  3476.75  15/10/2020 14:30:00     20  634.666156    18.423652
+sIWnkka    SP500  3503.649600  16/10/2020 09:45:00  3473.50  16/10/2020 15:00:00    -20  599.488350    17.110397
+XihBLba    SP500  3423.092275  19/10/2020 14:00:00  3450.00  20/10/2020 05:30:00     20  534.731408    15.621297
+Dm2U5jQ    SP500  3418.591825  26/10/2020 02:45:00  3396.25  26/10/2020 10:00:00     20 -450.255092   -13.170777
+EAtb5UL    SP500  3388.088775  26/10/2020 10:30:00  3361.75  26/10/2020 12:30:00     20 -530.163589   -15.647866
+3ua0S1x    SP500  3386.088575  26/10/2020 13:30:00  3360.00  27/10/2020 17:15:00     20 -525.157589   -15.509269
+...
+```
+
 - ```self.user_portfolio``` Pandas DataFrame with the representation of the assets in the user's portfolio and the total value of their wallet.
-<!---
-Add a table with an example of positions dataframe
--->
-- ```self.trades``` Pandas DataFrame with the information on the executed trades
-<!---
-Add a table with an example of positions dataframe
--->
-- ```self.orders``` Pandas DataFrame with the information of all orders either they are placed or not.
+
+Example:
+```
+    Security Amount    Value
+0    SP500    -20 -73070.0
+```
+
+- ```self.trades``` Pandas DataFrame with the information on the executed trades.
+
+Example:
+```
+       Security           Type             Datetime    Price Amount
+lfdXIFo    SP500           Sell  12/10/2020 10:15:00  3516.00      1
+6sp7cHv    SP500  Close#l7h7eRx  14/10/2020 10:45:00  3499.25    -20
+JXKYklr    SP500            Buy  15/10/2020 03:45:00  3444.25      1
+32Bc0fR    SP500  Close#eO9fL5Q  15/10/2020 14:15:00  3470.00     20
+oP3w0Ha    SP500           Sell  16/10/2020 09:30:00  3507.00      1
+XPTZCZE    SP500  Close#sIWnkka  16/10/2020 14:45:00  3484.00    -20
+izB77xS    SP500            Buy  19/10/2020 13:45:00  3432.25      1
+4qGx5Ld    SP500  Close#XihBLba  20/10/2020 05:15:00  3443.50     20
+...
+```
+
+- ```self.orders``` Pandas DataFrame with the information of all orders either if they are placed or not.
+
+Example:
+```
+        Security           Type             Datetime    Price Amount     Status
+DsN3JXP    SP500           Sell  12/10/2020 10:15:00  3516.00      1   Executed
+Ztfajo7    SP500  Close#l7h7eRx  14/10/2020 10:45:00  3499.25    -20   Executed
+VOiZwri    SP500            Buy  15/10/2020 03:45:00  3444.25      1   Executed
+2hUedWm    SP500  Close#eO9fL5Q  15/10/2020 14:15:00  3470.00     20   Executed
+O2j9Sjf    SP500           Sell  16/10/2020 09:30:00  3507.00      1   Executed
+lStGqRL    SP500  Close#sIWnkka  16/10/2020 14:45:00  3484.00    -20   Executed
+9lcGAFG    SP500            Buy  19/10/2020 13:45:00  3432.25      1   Executed
+X86B0s7    SP500  Close#XihBLba  20/10/2020 05:15:00  3443.50     20   Executed
+...
+```
 <!---
 Add a table with an example of positions dataframe
 -->
@@ -252,7 +314,7 @@ The methods of the inherited class are the following ones.
 
 - ```self.get_positions(security,_open=True)``` Returns a pandas DataFrame with the positions related to the specified security. The parameters are:
   - **security**: str. Name of the security of the positions.
-  - **_open**: bool. Refers to the state of the positions to be returned. If the method is called with ```_open=True```, the positions that will be returned are the currently open posigions; whilst if it is ```_open=False```, the method will return all positions regardless their state.
+  - **_open**: bool. Refers to the state of the positions to be returned. If the method is called with ```_open=True```, the positions that will be returned are the currently open posigions; whilst if it is ```_open=False```, the method will return all positions regardless of their state.
 
 
 - ```self.get_long_positions(security,_open=True)``` Returns a pandas Dataframe with only long positions. The parameters are:
@@ -276,7 +338,6 @@ Features
 --------
 TO DO: 
 - Multiple assets (threading)
-- Improve resulting dash app
 
 Credits
 -------
