@@ -4,6 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/serginc21/alphabacktest/badge.svg?branch=main)](https://coveralls.io/github/serginc21/alphabacktest?branch=main)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/alphabacktest?style=plastic)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/alphabacktest)
+[![Documentation Status](https://readthedocs.org/projects/alphabacktest/badge/?version=latest)](https://alphabacktest.readthedocs.io/en/latest/?badge=latest)
 -------
 > **DISCLAIMER: The results this backtesting software might produce may not be accurate, reliable or suppose any evidence ensuring a trading strategy profitability. The results are indicative and might not be appropiate for trading purposes. Therefore, the creator does not bear any responsibility for any losses anyone might incur as a result of using this software.**
 > 
@@ -53,11 +54,11 @@ You can find all releases in [PyPI](https://pypi.org/project/alphabacktest/).
 
 ### Dependencies ###
 
-As some of the features provided by the module are meant to be optional, **the installation of alphabacktest does not imply the collection** of TA-lib, dash nor pandas-datareader. Therefore, the package comes without these modules, which need to be installed by the user.
+As some of the features provided by the module are meant to be optional, **the installation of alphabacktest does not imply the collection** of TA-lib nor dash. Therefore, the package comes without these modules, which need to be installed by the user.
 
 - **TA-lib**. As there are sometimes difficulties when installing this module depending on the OS and IDE configuration, there is an option for the backtesting engine not to calculate any technical indicator (as all are based on TA-lib), so in that case you don't necessarily need to have it installed. In case you want to enable the calculation of technical indicators, you will indeed need the module you can find [here](https://github.com/mrjbq7/ta-lib). 
 - **Dash**. alphabacktest uses dash to plot and display the results. However, this option can also be desactivated. In case you do want it, you can find it [here](https://dash.plotly.com/installation). 
-- **Pandas datareader**. This module allows the program to import data from Yahoo Finance, you can find how to install it [here](https://github.com/pydata/pandas-datareader).
+
 
 
 ## Usage ## 
