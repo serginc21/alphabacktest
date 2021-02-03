@@ -334,6 +334,15 @@ The results are obtained via csv files and a dash app summary of the strategy pe
 ![](./img/dashappserver.png)
 
 
+If the user wishes to plot the results after the backtesting on an independent script, the way to call the dash app is the following.
+
+```python
+from alphabacktest._dash_results import DashApp
+
+DashApp(dateformat='dateformat',system_path='other/than/default')
+```
+If you don't specify the dateformat, the default will be considered as ```%Y-%m-%d```. For the system_path parameter, the default value is the cwd, otherwise it can be stated elsewhere, however all the results files need to be inside a folder called backtest_results.
+
 Features
 --------
 TO DO: 
