@@ -116,7 +116,7 @@ myStrategy(data)
 ```
 
 Data example:
-```python
+```
                         Open     High      Low    Close  Volume
 Datetime                                                       
 01/04/2007 17:15:00  3746.71  3850.91  3707.23  3843.52   4324200990.0
@@ -283,9 +283,10 @@ lStGqRL    SP500  Close#sIWnkka  16/10/2020 14:45:00  3484.00    -20   Executed
 X86B0s7    SP500  Close#XihBLba  20/10/2020 05:15:00  3443.50     20   Executed
 ...
 ```
-<!---
-Add a table with an example of positions dataframe
--->
+
+- ```self.free_balance``` Represents the free margin the account has.
+- ```self.capital``` Initial amount of funds the account is provided with.
+
 
 ### **Class methods** ###
 

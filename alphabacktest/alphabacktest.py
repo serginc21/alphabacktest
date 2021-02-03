@@ -9,10 +9,9 @@ class Account():
     def __init__(self):
         self.symbol = ''
         self.__settings()
-        self.assets = set()
-        self.free_balance = self.capital
+        self.free_balance = self._capital
         self.user_portfolio = pd.DataFrame(columns=['Security', 'Amount','Value'])
-        self.total_value = self.free_balance + self.user_portfolio['Value'].sum() + self.on_hold
+        self.total_value = self.free_balance + self.user_portfolio['Value'].sum() + self._on_hold
         self.costs_fees = 0
         
 
@@ -26,18 +25,18 @@ class Account():
 
 
     def __settings(self):
-            self.fees_perc = 0.00005
-            self.capital = 20000
-            self.slippage = 0.0003
-            self.leverage = 20
-            self.on_hold = 0
-            self.on_hold_book = pd.DataFrame(columns=['Position ID','Amount','Value'])
-            self.borrowed_money = 0
-            self.borrowed_book = pd.DataFrame(columns=['Position ID','Value'])
+            self._capital = 20000
+            self._fees_perc = 0
+            self._slippage = 0.0003
+            self._leverage = 20
+            self._on_hold = 0
+            self._on_hold_book = pd.DataFrame(columns=['Position ID','Amount','Value'])
+            self._borrowed_money = 0
+            self._borrowed_book = pd.DataFrame(columns=['Position ID','Value'])
 
     def _update_total_value(self):
 
-        self.total_value = self.free_balance + self.user_portfolio['Value'].sum() + self.on_hold - self.borrowed_money
+        self.total_value = self.free_balance + self.user_portfolio['Value'].sum() + self._on_hold - self._borrowed_money
 
 
 class Portfolio(Account):
@@ -81,33 +80,33 @@ class Portfolio(Account):
         pID = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
         if ptype =='Buy':
 
-            oprice = oprice *(1+self.slippage)
-            bamount = amount * (self.leverage-1)
+            oprice = oprice *(1+self._slippage)
+            bamount = amount * (self._leverage-1)
             tamount = bamount + amount
-            newBorrowed = pd.Series(data=[pID, bamount*oprice],index=self.borrowed_book.columns)
+            newBorrowed = pd.Series(data=[pID, bamount*oprice],index=self._borrowed_book.columns)
             newBorrowed.name = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
-            self.borrowed_book = self.borrowed_book.append(newBorrowed)
-            self.borrowed_money = self.borrowed_book['Value'].sum()
+            self._borrowed_book = self._borrowed_book.append(newBorrowed)
+            self._borrowed_money = self._borrowed_book['Value'].sum()
 
-            self.user_positions.loc[pID,:] = [sec, oprice, odate, '-','-',tamount,-tamount*oprice*self.fees_perc, 0]
+            self.user_positions.loc[pID,:] = [sec, oprice, odate, '-','-',tamount,-tamount*oprice*self._fees_perc, 0]
         else:
             
-            oprice = oprice*(1-self.slippage)
-            bamount = amount * (self.leverage-1)
+            oprice = oprice*(1-self._slippage)
+            bamount = amount * (self._leverage-1)
             tamount = bamount + amount
 
-            self.borrowed_book.loc[''.join(random.choices(string.ascii_letters+string.digits,k=7)),:] = [pID, bamount*oprice]
-            self.borrowed_money = self.borrowed_book['Value'].sum()
+            self._borrowed_book.loc[''.join(random.choices(string.ascii_letters+string.digits,k=7)),:] = [pID, bamount*oprice]
+            self._borrowed_money = self._borrowed_book['Value'].sum()
 
-            self.user_positions.loc[pID,:] = [sec, oprice, odate, '-','-',-tamount,-tamount*oprice*self.fees_perc, 0]
+            self.user_positions.loc[pID,:] = [sec, oprice, odate, '-','-',-tamount,-tamount*oprice*self._fees_perc, 0]
 
             ohID = ''.join(random.choices(string.ascii_letters+string.digits,k=7))
 
-            self.on_hold_book.loc[ohID,:] = [pID, 2*tamount, 2*tamount*oprice]
-            self.on_hold = self.on_hold_book['Value'].sum()
+            self._on_hold_book.loc[ohID,:] = [pID, 2*tamount, 2*tamount*oprice]
+            self._on_hold = self._on_hold_book['Value'].sum()
 
-        self.free_balance -= (tamount * oprice * self.fees_perc + amount*oprice)
-        self.costs_fees += tamount * oprice * self.fees_perc
+        self.free_balance -= (tamount * oprice * self._fees_perc + amount*oprice)
+        self.costs_fees += abs(tamount * oprice * self._fees_perc)
         if sec in self.user_portfolio['Security'].values:
 
             self._update_assets_amount(oprice)
@@ -123,31 +122,31 @@ class Portfolio(Account):
 
         self._update_position(price)
         tamount= self.user_positions.loc[position, 'Amount']
-        bmID = self.borrowed_book.index[self.borrowed_book['Position ID']==position].to_list()[0]
+        bmID = self._borrowed_book.index[self._borrowed_book['Position ID']==position].to_list()[0]
         if tamount > 0:
             self.user_positions.loc[position, 'CPrice'] = price
             self.user_positions.loc[position, 'CDate'] = dtime
-            self.free_balance += (self.user_positions.loc[position, 'Amount']) * price - self.borrowed_book.loc[bmID,'Value']
+            self.free_balance += (self.user_positions.loc[position, 'Amount']) * price - self._borrowed_book.loc[bmID,'Value']
 
         else:
             self.user_positions.loc[position, 'CPrice'] = price
             self.user_positions.loc[position, 'CDate'] = dtime
-            ohID = self.on_hold_book.index[self.on_hold_book['Position ID']==position].to_list()[0]
+            ohID = self._on_hold_book.index[self._on_hold_book['Position ID']==position].to_list()[0]
             # print(f"GIVING BACK TO FREE BALANCE: USD {self.on_hold_book.loc[ohID,'Value']/2 - abs(self.user_positions.loc[position, 'Amount']*price)}")
-            self.free_balance += self.on_hold_book.loc[ohID,'Value'] - abs(self.user_positions.loc[position, 'Amount']*price) - self.borrowed_book.loc[bmID,"Value"]
-            self.on_hold_book = self.on_hold_book.drop(ohID,axis=0)
-            self.on_hold = self.on_hold_book['Value'].sum()
+            self.free_balance += self._on_hold_book.loc[ohID,'Value'] - abs(self.user_positions.loc[position, 'Amount']*price) - self._borrowed_book.loc[bmID,"Value"]
+            self._on_hold_book = self._on_hold_book.drop(ohID,axis=0)
+            self._on_hold = self._on_hold_book['Value'].sum()
         
         closedPosition = pd.Series(data=self.user_positions.loc[position,:],index=self.closed_positions.columns)
         closedPosition.name = position
         self.closed_positions = self.closed_positions.append(closedPosition)
 
         self.user_positions.drop(labels=[position],axis=0,inplace=True)
-        self.borrowed_book = self.borrowed_book.drop(bmID,axis=0)
-        self.borrowed_money =self.borrowed_book['Value'].sum()
+        self._borrowed_book = self._borrowed_book.drop(bmID,axis=0)
+        self._borrowed_money =self._borrowed_book['Value'].sum()
         
-        self.free_balance -= abs(tamount * price * self.fees_perc)
-        self.costs_fees += abs(tamount * price * self.fees_perc)
+        self.free_balance -= abs(tamount * price * self._fees_perc)
+        self.costs_fees += abs(tamount * price * self._fees_perc)
         self._update_assets_amount(price)
 
 
@@ -156,11 +155,11 @@ class Portfolio(Account):
             oPrice = self.user_positions.loc[pID,'OPrice']
             pAmount = self.user_positions.loc[pID,'Amount']
             if pAmount >0:
-                self.user_positions.loc[pID,'PNL'] = -abs(pAmount*oPrice*self.fees_perc) + (cprice - oPrice)*abs(pAmount)
-                self.user_positions.loc[pID,'Performance'] = self.user_positions.loc[pID,'PNL'] / abs(oPrice * pAmount) * self.leverage *100
+                self.user_positions.loc[pID,'PNL'] = -abs(pAmount*oPrice*self._fees_perc) + (cprice - oPrice)*abs(pAmount)
+                self.user_positions.loc[pID,'Performance'] = self.user_positions.loc[pID,'PNL'] / abs(oPrice * pAmount) * self._leverage *100
             else:
-                self.user_positions.loc[pID,'PNL'] = -abs(pAmount*oPrice*self.fees_perc) + (oPrice - cprice)*abs(pAmount)
-                self.user_positions.loc[pID,'Performance'] = self.user_positions.loc[pID,'PNL'] / abs(oPrice * pAmount)* self.leverage * 100
+                self.user_positions.loc[pID,'PNL'] = -abs(pAmount*oPrice*self._fees_perc) + (oPrice - cprice)*abs(pAmount)
+                self.user_positions.loc[pID,'Performance'] = self.user_positions.loc[pID,'PNL'] / abs(oPrice * pAmount)* self._leverage * 100
 
 
     def _update_assets_amount(self, price):
@@ -220,7 +219,7 @@ class Broker(Trader):
         
 
     def __execute_opening_order(self, dtime, price, oID):
-        if abs(self.orders.loc[oID,'Amount'] * price) > self.free_balance or self.on_hold/self.leverage > 1*self.total_value/2:
+        if abs(self.orders.loc[oID,'Amount'] * price) > self.free_balance or self._on_hold/self._leverage > 1*self.total_value/2:
             self.orders.loc[oID,'Status'] = 'NotExecutedIF'
         elif self.orders.loc[oID,'Amount'] == 0:
             self.orders.loc[oID,'Status'] = 'NotExecutedN'
@@ -260,10 +259,10 @@ class Engine(Broker):
         """Period can be 1m-59m, 1h-23h, 1d-29d, 1M-11M, Xy"""
         super().__init__()
         
-        self.slippage = slippage
-        self.leverage = leverage
-        self.fees = fees
-        self.capital = capital
+        self._slippage = slippage
+        self._leverage = leverage
+        self._fees_perc = fees
+        self._capital = capital
         if ticker is not None:
             self.symbol = ticker
         else:
@@ -340,7 +339,7 @@ class Engine(Broker):
         
         for point, _ in zip(period,progressbar.progressbar(range(period_data.shape[0]))):
             dpoint = period_data[point]
-            pnl = pd.Series(data=[round((self.total_value/self.capital-1)*100,2)],index=self.pnl_history.columns)
+            pnl = pd.Series(data=[round((self.total_value/self._capital-1)*100,2)],index=self.pnl_history.columns)
             pnl.name = dpoint
             self.pnl_history = self.pnl_history.append(pnl)
             p = pd.Series(data=[closing_price[point]],index=self.p_history.columns)
@@ -373,7 +372,7 @@ class Engine(Broker):
 
         self.RSI = RSI(ind_data, timeperiod=14)
         self.UBB, self.MBB, self.LBB = BBANDS(ind_data, timeperiod=20, nbdevup= 2.5, nbdevdn=2.5, matype=0)
-        _, _, self.MACD = MACD(ind_data, fastperiod=12, slowperiod=26, signalperiod=9)
+        self.MACD, self.MACD_SIGNAL, self.MACD_HIST = MACD(ind_data, fastperiod=12, slowperiod=26, signalperiod=9)
         self.EMA = EMA(ind_data, timeperiod=10)
         self.EMA = self.EMA[~np.isnan(self.EMA)]
         self.SMA = SMA(ind_data, timeperiod=100)
@@ -491,4 +490,5 @@ class Engine(Broker):
 
             
         stats.loc[11,:] = ["Average pnl (%)",str(round(positions_stats["PNLp"].mean(),2))+"±"+str(round(positions_stats["PNLp"].std(),2))]
+        stats.loc[12,:] = ['Paid in fees', self.costs_fees]
         stats.to_csv(save_path+'/backtest_results/stats.csv',index=False)

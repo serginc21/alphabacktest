@@ -138,7 +138,12 @@ First release on PyPI.
 </tr>
 <tr>
 <td>
-0.1.10 (2021-02-01)
+0.1.10 (2021-01-29)
+</td>
+</tr>
+<tr>
+<td>
+0.1.11 (2021-02-02)
 </td>
 <td>
 Last release on PyPI. Faster execution

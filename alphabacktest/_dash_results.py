@@ -29,14 +29,14 @@ class DashApp():
         if self.positions_stats['Duration'].mean() > 3000:
             self.positions_stats['Duration'] = self.positions_stats['Duration'] / 60 / 24
             self.duration_tag = 'Duration (d)'        
-            self.duration_size = 5
+            self.duration_size = int(self.positions_stats['Duration'].max()/20)
         elif self.positions_stats['Duration'].mean() > 180:
             self.positions_stats['Duration'] = self.positions_stats['Duration'] / 60
-            self.duration_size = 5
+            self.duration_size = int(self.positions_stats['Duration'].max()/20)
             self.duration_tag = 'Duration (h)'
         else:
             self.duration_tag = 'Duration (min)'
-            self.duration_size = 60
+            self.duration_size = int(self.positions_stats['Duration'].max()/20)
 
 
         self.positions = pd.read_csv(system_path+'/backtest_results/userpositions.csv',sep=',')# ,format="%d/%m/%y %H:%M:00"
@@ -58,7 +58,7 @@ class DashApp():
 
 
     def treat_graphs(self,dateformat):
-
+        
         ## Positions histograms
         self.pnlshistogram = go.Figure(data=[go.Histogram(x=self.positions_stats["PNLp"],histnorm='probability',xbins=dict(size=2),marker_color='#007fbf')])
         self.durationhistogram = go.Figure(data=[go.Histogram(x=self.positions_stats["Duration"],histnorm='probability',xbins=dict(size=self.duration_size),marker_color='#007fbf')])

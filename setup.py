@@ -7,9 +7,6 @@ from setuptools import setup, find_packages
 with open('docs/README.md') as readme_file:
     readme = readme_file.read()
 
-# with open('HISTORY.md') as history_file:
-#     history = history_file.read()
-
 requirements = [ ]
 
 setup_requirements = [ ]
@@ -49,6 +46,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/serginc21/alphabacktest',
-    version='0.1.10',
+    version='0.1.14',
     zip_safe=False,
 )
