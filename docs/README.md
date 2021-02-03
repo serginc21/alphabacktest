@@ -285,7 +285,6 @@ X86B0s7    SP500  Close#XihBLba  20/10/2020 05:15:00  3443.50     20   Executed
 ```
 
 - ```self.free_balance``` Represents the free margin the account has.
-- ```self.capital``` Initial amount of funds the account is provided with.
 
 
 ### **Class methods** ###
